@@ -20,3 +20,7 @@ reqwest = "0.11.12"
 actix-web = "4"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 serde = { version = "1", features = ["derive"] }
+config = { version = "0.13", default-features = false, features = ["yaml"] }
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4.22", default-features = false, features = ["clock"] }
+sqlx = { version = "0.6.2", features = ["runtime-actix-rustls", "macros", "postgres", "uuid", "chrono", "migrate"] }
