@@ -1,9 +1,9 @@
+use sqlx::{Executor, PgPool};
 use std::fmt::format;
 use std::net::TcpListener;
-use zero2prod::startup::run;
-use sqlx::{Executor, PgPool};
 use uuid::Uuid;
-use zero2prod::configuration::{DatabaseSettings, get_configuration};
+use zero2prod::configuration::{get_configuration, DatabaseSettings};
+use zero2prod::startup::run;
 
 pub struct TestApp {
     pub address: String,
@@ -11,8 +11,7 @@ pub struct TestApp {
 }
 
 async fn spawn_app() -> TestApp {
-    let listener = TcpListener::bind("127.0.0.1:0")
-        .expect("Failed to bind to a random port");
+    let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind to a random port");
     let port = listener.local_addr().unwrap().port();
     let address = format!("http://127.0.0.1:{}", port);
 
@@ -21,8 +20,7 @@ async fn spawn_app() -> TestApp {
 
     let pool = configure_database(&configuration.database).await;
 
-    let server = run(listener, pool.clone())
-        .expect("Failed to bind address");
+    let server = run(listener, pool.clone()).expect("Failed to bind address");
 
     let _ = tokio::spawn(server);
 
@@ -33,9 +31,7 @@ async fn spawn_app() -> TestApp {
 }
 
 pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
-    let mut connection = PgPool::connect(
-        &config.connection_string_without_db_name()
-    )
+    let mut connection = PgPool::connect(&config.connection_string_without_db_name())
         .await
         .expect("Failed to connect to Postgres");
 
