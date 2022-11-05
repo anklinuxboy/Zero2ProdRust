@@ -1,5 +1,4 @@
 use secrecy::{ExposeSecret, Secret};
-use tracing_subscriber::fmt::format;
 
 #[derive(serde::Deserialize)]
 pub struct Settings {
