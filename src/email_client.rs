@@ -99,24 +99,45 @@ mod tests {
     use fake::faker::lorem::en::{Paragraph, Sentence};
     use fake::{Fake, Faker};
     use secrecy::Secret;
-    use wiremock::matchers::any;
-    use wiremock::{Mock, MockServer, ResponseTemplate};
+    use wiremock::matchers::{any, header, header_exists, method, path};
+    use wiremock::{Mock, MockServer, Request, ResponseTemplate};
+
+    struct SendEmailBodyMatcher;
+
+    impl wiremock::Match for SendEmailBodyMatcher {
+        fn matches(&self, request: &Request) -> bool {
+            let result: Result<serde_json::Value, _> = serde_json::from_slice(&request.body);
+            if let Ok(body) = result {
+                dbg!(&body);
+                body.get("personalization").is_some()
+                    && body.get("from").is_some()
+                    && body.get("subject").is_some()
+                    && body.get("content").is_some()
+            } else {
+                false
+            }
+        }
+    }
 
     #[tokio::test]
-    async fn send_email_fires_a_request_to_base_url() {
+    async fn send_email_sends_the_expected_request() {
         let mock_server = MockServer::start().await;
         let sender = SubscriberEmail::parse(SafeEmail().fake()).unwrap();
         let email_client = EmailClient::new(mock_server.uri(), sender, Secret::new(Faker.fake()));
 
-        Mock::given(any())
+        let subscriber_email = SubscriberEmail::parse(SafeEmail().fake()).unwrap();
+        let subject: String = Sentence(1..2).fake();
+        let content: String = Paragraph(1..10).fake();
+
+        Mock::given(header_exists("Authorization"))
+            .and(header("Content-Type", "application/json"))
+            .and(path("/mail/send"))
+            .and(method("POST"))
+            .and(SendEmailBodyMatcher)
             .respond_with(ResponseTemplate::new(200))
             .expect(1)
             .mount(&mock_server)
             .await;
-
-        let subscriber_email = SubscriberEmail::parse(SafeEmail().fake()).unwrap();
-        let subject: String = Sentence(1..2).fake();
-        let content: String = Paragraph(1..10).fake();
 
         let _ = email_client
             .send_email(subscriber_email, &subject, &content, &content)
