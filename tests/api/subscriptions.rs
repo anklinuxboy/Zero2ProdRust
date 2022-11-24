@@ -115,25 +115,10 @@ async fn subscribe_sends_a_confirmation_email_with_a_link() {
 
     let email_request = &app.email_server.received_requests().await.unwrap()[0];
     let body: serde_json::Value = serde_json::from_slice(&email_request.body).unwrap();
-    dbg!(&body);
-    let get_link = |s: &str| {
-        dbg!("link text is {}", s);
-        let links: Vec<_> = linkify::LinkFinder::new()
-            .links(s)
-            .filter(|l| *l.kind() == linkify::LinkKind::Url)
-            .collect();
+    let html_link = app.get_confirmation_links(&email_request);
 
-        assert_eq!(links.len(), 1);
-        links[0].as_str().to_owned()
-    };
-
-    let link_text = &body.as_object().unwrap()["content"].as_array().unwrap()[0]
-        .as_object()
-        .unwrap()["value"]
-        .as_str()
-        .unwrap()
-        .to_owned();
-
-    let html_link = get_link(link_text);
-    assert_eq!(html_link, "https://my-api.com/subscriptions/confirm");
+    assert_eq!(
+        html_link.html.as_str(),
+        "http://127.0.0.1/subscriptions/confirm?subscription_token=token"
+    );
 }
