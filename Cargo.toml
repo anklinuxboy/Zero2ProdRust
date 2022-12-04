@@ -30,6 +30,8 @@ tracing-actix-web = "0.6"
 unicode-segmentation = "1.7.1"
 validator = "0.15.0"
 rand = { version = "0.8.5", features = ["std_rng"] }
+thiserror = "1.0.37"
+anyhow = "1.0.66"
 
 [dependencies.sqlx]
 version = "0.6.2"
