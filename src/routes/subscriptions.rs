@@ -125,7 +125,8 @@ pub async fn store_token(
         subscriber_id
     )
     .execute(txn)
-    .await?;
+    .await
+    .map_err(StoreTokenError)?;
 
     Ok(())
 }
@@ -136,12 +137,6 @@ pub enum SubscribeError {
     ValidationError(String),
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
-}
-
-impl std::fmt::Display for SubscribeError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Failed to create a new subscriber")
-    }
 }
 
 impl std::fmt::Debug for SubscribeError {
