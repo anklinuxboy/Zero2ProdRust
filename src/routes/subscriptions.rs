@@ -9,7 +9,7 @@ use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use sqlx::{PgPool, Postgres, Transaction};
 use std::error::Error;
-use std::fmt::Formatter;
+use std::fmt::{Display, Formatter};
 use std::ops::Sub;
 use uuid::Uuid;
 
@@ -37,6 +37,7 @@ impl TryFrom<FormData> for NewSubscriber {
     }
 }
 
+//noinspection RsTypeCheck
 #[tracing::instrument(
 name = "Adding a new subscriber",
 skip(form, conn_pool, email_client, base_url),
@@ -105,7 +106,7 @@ pub async fn send_confirmation_email(
     );
 
     email_client
-        .send_email(new_subscriber.email, "Welcome!", &html_body, &plain_body)
+        .send_email(&new_subscriber.email, "Welcome!", &html_body, &plain_body)
         .await
 }
 
@@ -177,7 +178,7 @@ impl std::fmt::Debug for StoreTokenError {
     }
 }
 
-fn error_chain_fmt(
+pub fn error_chain_fmt(
     e: &impl std::error::Error,
     f: &mut std::fmt::Formatter<'_>,
 ) -> std::fmt::Result {
