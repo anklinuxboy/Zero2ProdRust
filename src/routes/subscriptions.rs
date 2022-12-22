@@ -9,8 +9,7 @@ use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use sqlx::{PgPool, Postgres, Transaction};
 use std::error::Error;
-use std::fmt::{Display, Formatter};
-use std::ops::Sub;
+use std::fmt::Formatter;
 use uuid::Uuid;
 
 fn generate_subscription_token() -> String {
