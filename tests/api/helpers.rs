@@ -22,7 +22,7 @@ static TRACING: Lazy<()> = Lazy::new(|| {
 });
 
 pub struct TestUser {
-    pub user_id: Uuid,
+    user_id: Uuid,
     pub username: String,
     pub password: String,
 }
@@ -60,7 +60,7 @@ pub struct TestApp {
     pub port: u16,
     pub db_pool: PgPool,
     pub email_server: MockServer,
-    test_user: TestUser,
+    pub test_user: TestUser,
     pub api_client: reqwest::Client,
 }
 
@@ -138,6 +138,18 @@ impl TestApp {
             .text()
             .await
             .unwrap()
+    }
+
+    pub async fn get_admin_dashboard(&self) -> reqwest::Response {
+        self.api_client
+            .get(&format!("{}/admin/dashboard", &self.address))
+            .send()
+            .await
+            .expect("Failed to execute request")
+    }
+
+    pub async fn get_admin_dashboard_html(&self) -> String {
+        self.get_admin_dashboard().await.text().await.unwrap()
     }
 }
 
